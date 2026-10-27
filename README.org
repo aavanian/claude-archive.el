@@ -1,0 +1,132 @@
+#+title: claude-archive
+
+Browse and search the conversations of a [[https://claude.ai][claude.ai]] data export from
+Emacs.
+
+claude.ai lets you export your data (/Settings → Privacy → Export
+data/).  The export is a zip holding, among others, a
+=conversations.json= file with every conversation.  claude-archive
+lists those conversations, searches them, and renders any of them as a
+read-only markdown buffer.
+
+* Features
+
+- A list of every conversation with its start date, end date, message
+  count and title.  Untitled conversations are named after their first
+  prompt.
+- Keyword search (all terms must match, quoted phrases, case
+  insensitive) and regexp search, both listing the matching
+  conversations with their number of hits.  Results can be narrowed
+  further.
+- A rendering of each conversation, one heading per message, with
+  matches highlighted when opened from a search.  Thinking, tool
+  results and pasted content are hidden by default and toggled with
+  =v=.
+- The claude.ai link of any conversation, as a plain URL or an Org link.
+- Optional consult commands with live preview: pick a conversation by
+  title, or search as you type.
+
+A conversation edited or regenerated on claude.ai keeps every branch in
+the export; only the most recent branch is shown, and the rendering
+says how many branches there are.
+
+* Requirements
+
+- Emacs 29.2 or later
+- [[https://github.com/jrblevin/markdown-mode][markdown-mode]]
+- [[https://github.com/minad/consult][consult]] 2.0 or later, only for =claude-archive-consult.el=
+
+* Installation
+
+Unzip each export into its own directory, all under one parent
+directory, and point =claude-archive-directory= at that parent.
+Pointing it at a single unzipped export works too.  The most recently
+modified =conversations.json= is read.
+
+** straight.el / use-package
+
+#+begin_src emacs-lisp
+(use-package claude-archive
+  :straight (:host github :repo "aavanian/claude-archive.el")
+  :custom
+  (claude-archive-directory "~/Documents/claude-exports/"))
+
+;; Optional, needs consult
+(use-package claude-archive-consult
+  :straight nil
+  :after consult)
+#+end_src
+
+** package-vc (Emacs 30)
+
+#+begin_src emacs-lisp
+(use-package claude-archive
+  :vc (:url "https://github.com/aavanian/claude-archive.el")
+  :custom
+  (claude-archive-directory "~/Documents/claude-exports/"))
+#+end_src
+
+* Usage
+
+| Command                         | Action                                           |
+|---------------------------------+--------------------------------------------------|
+| =claude-archive=                | List every conversation                          |
+| =claude-archive-search=         | List the conversations containing every keyword  |
+| =claude-archive-search-regexp=  | List the conversations matching a regexp         |
+| =claude-archive-open=           | Pick a conversation by title and show it         |
+| =claude-archive-consult=        | Pick a conversation by title, with preview       |
+| =claude-archive-consult-search= | Search as you type, with preview                 |
+
+Keywords are separated by spaces; double quotes group a phrase, as in
+=tuscany "car rental"=.  Matching ignores case.
+
+The export is read on first use and kept in memory until the file
+changes.
+
+** In a list
+
+| Key            | Action                                                  |
+|----------------+---------------------------------------------------------|
+| =RET=, =o=     | Show the conversation in another window and select it   |
+| =SPC=, =C-o=   | Show the conversation, staying in the list              |
+| =M-n=, =M-p=   | Move to the next/previous conversation and show it      |
+| =s=            | New keyword search                                      |
+| =r=            | New regexp search                                       |
+| =/=            | Narrow with more keywords (a regexp with =C-u=)         |
+| =w=            | Copy the claude.ai URL                                  |
+| =W=            | Copy an Org link to claude.ai                           |
+| =b=            | Open the conversation on claude.ai                      |
+| =G=            | Read the export again                                   |
+| =S=            | Sort by the column at point                             |
+
+** In a conversation
+
+| Key            | Action                                                  |
+|----------------+---------------------------------------------------------|
+| =n=, =p=       | Next/previous message                                   |
+| =]=, =[=       | Next/previous match                                     |
+| =v=            | Show/hide thinking, tool details and pasted content     |
+| =w=, =W=, =b=  | As in a list                                            |
+| =TAB=          | Fold (markdown-mode heading cycling)                    |
+| =q=            | Quit the window                                         |
+
+* Customization
+
+- =claude-archive-directory= — where the exports are.
+- =claude-archive-title-length= — length of titles derived from a
+  first prompt.
+- =claude-archive-tool-result-length= — length of tool results in
+  verbose rendering.
+- =claude-archive-match= — face of the highlighted matches.
+
+* Development
+
+=./check.sh= runs shellcheck, byte-compilation, checkdoc, package-lint
+and the ERT suites.  It finds the dependencies in the straight.el build
+directory next to the checkout, or in =MARKDOWN_MODE_DIR=,
+=CONSULT_DIR=, =COMPAT_DIR= and =PACKAGE_LINT_DIR=.  package-lint is
+skipped when absent.
+
+* License
+
+GPLv3 or later.  See [[file:LICENSE][LICENSE]].

@@ -1,0 +1,33 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs_version: ["29.4", "30.2", "snapshot"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+      - name: Fetch elisp dependencies
+        run: |
+          mkdir -p deps
+          for repo in jrblevin/markdown-mode minad/consult emacs-compat/compat \
+                      purcell/package-lint; do
+            git clone --depth 1 "https://github.com/$repo.git" "deps/${repo#*/}"
+          done
+      - name: Run checks
+        env:
+          MARKDOWN_MODE_DIR: deps/markdown-mode
+          CONSULT_DIR: deps/consult
+          COMPAT_DIR: deps/compat
+          PACKAGE_LINT_DIR: deps/package-lint
+        run: ./check.sh
