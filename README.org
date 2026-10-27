@@ -1,5 +1,9 @@
 #+title: claude-archive
 
+[[https://github.com/aavanian/claude-archive.el/actions/workflows/check.yml][https://github.com/aavanian/claude-archive.el/actions/workflows/check.yml/badge.svg]]
+[[https://www.gnu.org/licenses/gpl-3.0][https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg]]
+[[https://www.gnu.org/software/emacs/][https://img.shields.io/badge/Emacs-29.2+-7F5AB6.svg?logo=gnuemacs&logoColor=white]]
+
 Browse and search the conversations of a [[https://claude.ai][claude.ai]] data export from
 Emacs.
 
