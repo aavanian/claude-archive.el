@@ -125,7 +125,11 @@ changes.
 and the ERT suites.  It finds the dependencies in the straight.el build
 directory next to the checkout, or in =MARKDOWN_MODE_DIR=,
 =CONSULT_DIR=, =COMPAT_DIR= and =PACKAGE_LINT_DIR=.  package-lint is
-skipped when absent.
+skipped when absent, and needs network access to read the package
+archives.
+
+=claude-archive.el= and =claude-archive-consult.el= are two packages
+sharing this repository, each with its own dependencies.
 
 * License
 

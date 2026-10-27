@@ -6,7 +6,8 @@
 # this checkout normally lives next to.  Point MARKDOWN_MODE_DIR,
 # CONSULT_DIR and COMPAT_DIR at the directories holding markdown-mode.el,
 # consult.el and compat.el to use others.  package-lint runs when
-# PACKAGE_LINT_DIR (or its straight build) holds package-lint.el.
+# PACKAGE_LINT_DIR (or its straight build) holds package-lint.el; it
+# needs network access to read the package archives.
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -89,9 +90,24 @@ run_package_lint() {
 		echo "skipped: no package-lint in $PACKAGE_LINT_DIR"
 		return
 	fi
-	run_emacs -L "$PACKAGE_LINT_DIR" --eval "(require 'package-lint)" \
-		--eval "(setq package-lint-main-file \"claude-archive.el\")" \
+	local elpa
+	elpa=$(mktemp -d)
+	# package-lint checks dependencies against the package archives.  Each
+	# source is its own package, so claude-archive is installed to satisfy
+	# claude-archive-consult's dependency on it.
+	run_emacs -L "$PACKAGE_LINT_DIR" --eval "(progn
+                            (require 'package)
+                            (setq package-user-dir \"$elpa\"
+                                  package-archives
+                                  '((\"gnu\" . \"https://elpa.gnu.org/packages/\")
+                                    (\"nongnu\" . \"https://elpa.nongnu.org/nongnu/\")
+                                    (\"melpa\" . \"https://melpa.org/packages/\")))
+                            (package-initialize)
+                            (package-refresh-contents)
+                            (package-install-file \"claude-archive.el\")
+                            (require 'package-lint))" \
 		-f package-lint-batch-and-exit "${SOURCES[@]}"
+	rm -rf "$elpa"
 }
 
 run_ert() {
